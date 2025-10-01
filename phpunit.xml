@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    stopOnFailure="false"
+    verbose="true">
+    <testsuites>
+        <testsuite name="JWT Tests">
+            <directory>tests/JWT</directory>
+        </testsuite>
+        <testsuite name="Token Tests">
+            <directory>tests/Token</directory>
+        </testsuite>
+        <testsuite name="Security Tests">
+            <directory>tests/Security</directory>
+        </testsuite>
+        <testsuite name="HTTP Tests">
+            <directory>tests/Http</directory>
+        </testsuite>
+        <testsuite name="OAuth2 Tests">
+            <directory>tests/OAuth2</directory>
+        </testsuite>
+    </testsuites>
+    <coverage>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage>
+</phpunit>

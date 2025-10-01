@@ -1,0 +1,189 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WPRestAuth\AuthToolkit\Http;
+
+/**
+ * HTTP Cookie Manager
+ *
+ * Manages HTTP-only cookies for refresh token storage with secure defaults.
+ * Supports both PHP 7.3+ array syntax and legacy string syntax for SameSite attribute.
+ *
+ * @package WPRestAuth\AuthToolkit\Http
+ */
+class Cookie
+{
+    /**
+     * Set an HTTP-only cookie with secure defaults
+     *
+     * @param string $name Cookie name
+     * @param string $value Cookie value
+     * @param array $options Cookie options
+     * @return bool Success status
+     */
+    public static function set(string $name, string $value, array $options = []): bool
+    {
+        // Skip in CLI/test environments
+        if (self::isCliEnvironment()) {
+            return true;
+        }
+
+        $defaults = [
+            'expires'  => 0,
+            'path'     => '/',
+            'domain'   => '',
+            'secure'   => self::isSecure(),
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ];
+
+        $options = array_merge($defaults, $options);
+
+        // Apply WordPress filters if available
+        if (function_exists('apply_filters')) {
+            $options['samesite'] = apply_filters('wp_rest_auth_cookie_samesite', $options['samesite']);
+        }
+
+        // Use PHP 7.3+ array syntax if available
+        if (PHP_VERSION_ID >= 70300) {
+            return setcookie($name, $value, [
+                'expires'  => $options['expires'],
+                'path'     => $options['path'],
+                'domain'   => $options['domain'],
+                'secure'   => $options['secure'],
+                'httponly' => $options['httponly'],
+                'samesite' => $options['samesite'],
+            ]);
+        }
+
+        // Fallback for PHP < 7.3: use path hack for SameSite
+        return setcookie(
+            $name,
+            $value,
+            $options['expires'],
+            $options['path'] . '; SameSite=' . $options['samesite'],
+            $options['domain'],
+            $options['secure'],
+            $options['httponly']
+        );
+    }
+
+    /**
+     * Delete a cookie
+     *
+     * @param string $name Cookie name
+     * @param string $path Cookie path
+     * @return bool Success status
+     */
+    public static function delete(string $name, string $path = '/'): bool
+    {
+        return self::set($name, '', [
+            'expires' => time() - 3600,
+            'path'    => $path,
+        ]);
+    }
+
+    /**
+     * Get cookie value
+     *
+     * @param string $name Cookie name
+     * @param mixed $default Default value if cookie doesn't exist
+     * @return mixed Cookie value or default
+     */
+    public static function get(string $name, $default = null)
+    {
+        if (!isset($_COOKIE[$name])) {
+            return $default;
+        }
+
+        // Use WordPress sanitization if available
+        if (function_exists('sanitize_text_field')) {
+            return sanitize_text_field(wp_unslash($_COOKIE[$name]));
+        }
+
+        return filter_var($_COOKIE[$name], FILTER_SANITIZE_STRING);
+    }
+
+    /**
+     * Check if cookie exists
+     *
+     * @param string $name Cookie name
+     * @return bool True if cookie exists
+     */
+    public static function has(string $name): bool
+    {
+        return isset($_COOKIE[$name]);
+    }
+
+    /**
+     * Check if request is over HTTPS
+     *
+     * @return bool True if secure
+     */
+    private static function isSecure(): bool
+    {
+        // Check WordPress function first
+        if (function_exists('is_ssl')) {
+            return is_ssl();
+        }
+
+        // Standard HTTPS detection
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            return true;
+        }
+
+        // Check if behind proxy/load balancer
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            return true;
+        }
+
+        if (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if running in CLI environment
+     *
+     * @return bool True if CLI
+     */
+    private static function isCliEnvironment(): bool
+    {
+        if (defined('WP_CLI') && WP_CLI) {
+            return true;
+        }
+
+        if (php_sapi_name() === 'cli') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Set refresh token cookie with sensible defaults
+     *
+     * @param string $name Cookie name
+     * @param string $value Refresh token value
+     * @param int $ttl Time to live in seconds
+     * @param string $path Cookie path
+     * @return bool Success status
+     */
+    public static function setRefreshToken(
+        string $name,
+        string $value,
+        int $ttl = 2592000,
+        string $path = '/'
+    ): bool {
+        return self::set($name, $value, [
+            'expires'  => time() + $ttl,
+            'path'     => $path,
+            'httponly' => true,
+            'secure'   => true,
+            'samesite' => 'Strict',
+        ]);
+    }
+}
