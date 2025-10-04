@@ -1,5 +1,6 @@
 # WP REST Auth Toolkit
 
+[![Tests](https://github.com/juanma-wp/wp-rest-auth-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/juanma-wp/wp-rest-auth-toolkit/actions/workflows/tests.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-blue.svg)](https://php.net)
 
