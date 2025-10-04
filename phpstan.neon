@@ -1,0 +1,17 @@
+parameters:
+    level: 6
+    paths:
+        - src
+    excludePaths:
+        - vendor
+        - src/Admin
+    ignoreErrors:
+        # Ignore WordPress constants
+        - '#Constant ARRAY_A not found#'
+        - '#Constant DAY_IN_SECONDS not found#'
+        # Ignore WordPress functions
+        - '#Function .+ not found#'
+        # Ignore unreachable code warnings
+        - '#Unreachable statement#'
+        # Allow missing type hints
+        - identifier: missingType.iterableValue

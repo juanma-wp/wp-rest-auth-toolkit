@@ -1,8 +1,8 @@
 /vendor/
 /composer.lock
 /.phpunit.cache/
-/phpstan.neon
-/phpcs.xml
+
+
 .DS_Store
 .idea/
 *.log
