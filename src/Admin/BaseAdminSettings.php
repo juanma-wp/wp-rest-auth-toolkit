@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Base Admin Settings class
  * Provides shared functionality for admin settings pages

@@ -41,9 +41,3 @@ jobs:
 
     - name: Run PHPUnit tests
       run: composer test
-
-    - name: Run PHPStan
-      run: composer phpstan
-
-    - name: Run PHP CodeSniffer
-      run: composer lint

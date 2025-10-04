@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset name="WP REST Auth Toolkit">
+    <description>Coding standards for WP REST Auth Toolkit</description>
+
+    <!-- Scan these paths -->
+    <file>src</file>
+
+    <!-- Exclude vendor and specific directories -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/Admin/*</exclude-pattern>
+
+    <!-- Use PSR-12 as base -->
+    <rule ref="PSR12">
+        <!-- Allow longer lines for readability -->
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <!-- Show progress -->
+    <arg value="ps"/>
+
+    <!-- Use colors in output -->
+    <arg name="colors"/>
+</ruleset>

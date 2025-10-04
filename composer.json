@@ -41,8 +41,8 @@
   "scripts": {
     "test": "phpunit",
     "phpstan": "phpstan analyse --memory-limit=512M",
-    "lint": "phpcs --standard=PSR12 src/",
-    "lint-fix": "phpcbf --standard=PSR12 src/"
+    "lint": "phpcs",
+    "lint-fix": "phpcbf"
   },
   "config": {
     "platform": {
