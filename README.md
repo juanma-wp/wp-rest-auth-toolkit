@@ -35,6 +35,7 @@ By sharing this code, we ensure:
 
 ### HTTP Utilities
 - **Cookie** - HTTP-only cookie management
+- **CookieConfig** - Environment-aware cookie configuration with auto-detection
 - **Cors** - Cross-Origin Resource Sharing handling
 - **Response** - Standardized REST API response formatting
 
@@ -114,8 +115,16 @@ $ua = UserAgent::get();
 
 ```php
 use WPRestAuth\AuthToolkit\Http\Cookie;
+use WPRestAuth\AuthToolkit\Http\CookieConfig;
 use WPRestAuth\AuthToolkit\Http\Cors;
 use WPRestAuth\AuthToolkit\Http\Response;
+
+// Get environment-aware cookie configuration
+$config = CookieConfig::getConfig(
+    'my_cookie_config',      // Option name
+    'my_cookie',             // Filter prefix
+    'MY_COOKIE'              // Constant prefix
+);
 
 // Set HTTP-only cookie
 Cookie::set('refresh_token', $token, [
@@ -124,6 +133,21 @@ Cookie::set('refresh_token', $token, [
     'secure' => true,
     'samesite' => 'Strict'
 ]);
+
+// Or use CookieConfig settings
+Cookie::set('refresh_token', $token, [
+    'expires' => time() + $config['lifetime'],
+    'httponly' => $config['httponly'],
+    'secure' => $config['secure'],
+    'samesite' => $config['samesite'],
+    'path' => $config['path'],
+    'domain' => $config['domain']
+]);
+
+// Check environment
+if (CookieConfig::isDevelopment()) {
+    // Development-specific logic
+}
 
 // Handle CORS
 Cors::handleRequest([
