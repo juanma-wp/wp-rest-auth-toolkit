@@ -321,14 +321,15 @@ class RefreshTokenManager
     {
         global $wpdb;
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        $deleted = $wpdb->delete(
-            $this->table_name,
-            [
-                'token_type' => $this->token_type,
-                // Only delete tokens expired more than 7 days ago
-                'expires_at' => ['<', time() - (7 * DAY_IN_SECONDS)],
-            ]
+        $expired_time = time() - (7 * DAY_IN_SECONDS);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $deleted = $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$this->table_name} WHERE token_type = %s AND expires_at < %d",
+                $this->token_type,
+                $expired_time
+            )
         );
 
         return (int) $deleted;
