@@ -54,12 +54,8 @@ class UserAgent
             return sanitize_text_field($user_agent);
         }
 
-        // Basic sanitization
-        return filter_var(
-            $user_agent,
-            FILTER_SANITIZE_STRING,
-            FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-        );
+        // Basic sanitization: remove control characters and strip tags
+        return htmlspecialchars(strip_tags($user_agent), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**

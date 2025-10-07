@@ -91,8 +91,8 @@ class IpResolver
             return sanitize_text_field($ip);
         }
 
-        // Basic sanitization: remove control characters
-        return filter_var($ip, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        // Basic sanitization: remove control characters and strip tags
+        return htmlspecialchars(strip_tags($ip), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**

@@ -87,22 +87,40 @@ class Cookie
     /**
      * Get cookie value
      *
+     * Handles both standard $_COOKIE access and fallback parsing from HTTP_COOKIE header
+     * for cases where $_COOKIE is not populated (e.g., some cross-origin REST API requests).
+     *
      * @param string $name Cookie name
      * @param mixed $default Default value if cookie doesn't exist
      * @return mixed Cookie value or default
      */
     public static function get(string $name, $default = null)
     {
-        if (!isset($_COOKIE[$name])) {
+        // Try $_COOKIE first (standard approach)
+        if (isset($_COOKIE[$name])) {
+            $value = $_COOKIE[$name];
+        } elseif (!empty($_SERVER['HTTP_COOKIE'])) {
+            // Fallback: parse from HTTP_COOKIE header
+            // This handles cases where $_COOKIE isn't populated in cross-origin REST requests
+            $cookies = [];
+            parse_str(str_replace('; ', '&', $_SERVER['HTTP_COOKIE']), $cookies);
+
+            if (!isset($cookies[$name])) {
+                return $default;
+            }
+
+            $value = $cookies[$name];
+        } else {
             return $default;
         }
 
         // Use WordPress sanitization if available
         if (function_exists('sanitize_text_field')) {
-            return sanitize_text_field(wp_unslash($_COOKIE[$name]));
+            return sanitize_text_field(wp_unslash($value));
         }
 
-        return filter_var($_COOKIE[$name], FILTER_SANITIZE_STRING);
+        // Fallback sanitization (FILTER_SANITIZE_STRING is deprecated in PHP 8.1+)
+        return htmlspecialchars(strip_tags($value), ENT_QUOTES, 'UTF-8');
     }
 
     /**
