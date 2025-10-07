@@ -402,17 +402,20 @@ class CookieConfig
             return;
         }
 
-        error_log(
-            sprintf(
-                '[Cookie Config] env=%s, auto_detect=%s, samesite=%s, secure=%s, httponly=%s, path=%s',
-                $config['environment'],
-                $config['auto_detect'] ? 'yes' : 'no',
-                $config['samesite'],
-                $config['secure'] ? 'yes' : 'no',
-                $config['httponly'] ? 'yes' : 'no',
-                $config['path']
-            )
-        );
+        // Use WordPress logging if available
+        if (function_exists('error_log')) {
+            error_log(
+                sprintf(
+                    '[Cookie Config] env=%s, auto_detect=%s, samesite=%s, secure=%s, httponly=%s, path=%s',
+                    $config['environment'],
+                    $config['auto_detect'] ? 'yes' : 'no',
+                    $config['samesite'],
+                    $config['secure'] ? 'yes' : 'no',
+                    $config['httponly'] ? 'yes' : 'no',
+                    $config['path']
+                )
+            );
+        }
     }
 
     /**
@@ -436,9 +439,11 @@ class CookieConfig
         }
 
         // Fallback detection based on domain and WP_DEBUG
-        $host = isset($_SERVER['HTTP_HOST'])
-            ? strtolower(self::sanitizeTextField($_SERVER['HTTP_HOST']))
-            : '';
+        $host = '';
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $value = function_exists('wp_unslash') ? wp_unslash($_SERVER['HTTP_HOST']) : stripslashes($_SERVER['HTTP_HOST']);
+            $host = strtolower(self::sanitizeTextField($value));
+        }
 
         // Development indicators
         if (

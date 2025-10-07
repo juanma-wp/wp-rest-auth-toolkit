@@ -106,11 +106,11 @@ class Cors
             return '';
         }
 
-        $origin = $_SERVER['HTTP_ORIGIN'];
+        $origin = function_exists('wp_unslash') ? wp_unslash($_SERVER['HTTP_ORIGIN']) : stripslashes($_SERVER['HTTP_ORIGIN']);
 
         // Sanitize if WordPress function available
         if (function_exists('sanitize_text_field')) {
-            return sanitize_text_field(wp_unslash($origin));
+            return sanitize_text_field($origin);
         }
 
         return filter_var($origin, FILTER_SANITIZE_URL);

@@ -29,7 +29,7 @@ class Hasher
         }
 
         if (!in_array($algorithm, hash_algos(), true)) {
-            throw new \InvalidArgumentException("Unsupported hash algorithm: {$algorithm}");
+            throw new \InvalidArgumentException(sprintf('Unsupported hash algorithm: %s', $algorithm));
         }
 
         $this->secret = $secret;

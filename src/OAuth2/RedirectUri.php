@@ -23,7 +23,8 @@ class RedirectUri
      */
     public static function validate(string $uri, bool $allow_localhost = true): bool
     {
-        $parsed = parse_url($uri);
+        $parse_func = function_exists('wp_parse_url') ? 'wp_parse_url' : 'parse_url';
+        $parsed = $parse_func($uri);
 
         // Must have scheme and host
         if (!isset($parsed['scheme']) || !isset($parsed['host'])) {
@@ -186,7 +187,8 @@ class RedirectUri
      */
     public static function getQueryParams(string $uri): array
     {
-        $parsed = parse_url($uri);
+        $parse_func = function_exists('wp_parse_url') ? 'wp_parse_url' : 'parse_url';
+        $parsed = $parse_func($uri);
         $params = [];
 
         if (isset($parsed['query'])) {
@@ -287,7 +289,8 @@ class RedirectUri
      */
     public static function normalize(string $uri): string
     {
-        $parsed = parse_url($uri);
+        $parse_func = function_exists('wp_parse_url') ? 'wp_parse_url' : 'parse_url';
+        $parsed = $parse_func($uri);
 
         if (!$parsed) {
             return $uri;

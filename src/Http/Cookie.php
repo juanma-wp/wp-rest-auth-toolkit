@@ -98,12 +98,13 @@ class Cookie
     {
         // Try $_COOKIE first (standard approach)
         if (isset($_COOKIE[$name])) {
-            $value = $_COOKIE[$name];
+            $value = function_exists('wp_unslash') ? wp_unslash($_COOKIE[$name]) : stripslashes($_COOKIE[$name]);
         } elseif (!empty($_SERVER['HTTP_COOKIE'])) {
             // Fallback: parse from HTTP_COOKIE header
             // This handles cases where $_COOKIE isn't populated in cross-origin REST requests
             $cookies = [];
-            parse_str(str_replace('; ', '&', $_SERVER['HTTP_COOKIE']), $cookies);
+            $http_cookie = function_exists('wp_unslash') ? wp_unslash($_SERVER['HTTP_COOKIE']) : stripslashes($_SERVER['HTTP_COOKIE']);
+            parse_str(str_replace('; ', '&', $http_cookie), $cookies);
 
             if (!isset($cookies[$name])) {
                 return $default;
@@ -116,11 +117,12 @@ class Cookie
 
         // Use WordPress sanitization if available
         if (function_exists('sanitize_text_field')) {
-            return sanitize_text_field(wp_unslash($value));
+            return sanitize_text_field($value);
         }
 
         // Fallback sanitization (FILTER_SANITIZE_STRING is deprecated in PHP 8.1+)
-        return htmlspecialchars(strip_tags($value), ENT_QUOTES, 'UTF-8');
+        $strip_func = function_exists('wp_strip_all_tags') ? 'wp_strip_all_tags' : 'strip_tags';
+        return htmlspecialchars($strip_func($value), ENT_QUOTES, 'UTF-8');
     }
 
     /**

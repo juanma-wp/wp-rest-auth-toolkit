@@ -39,7 +39,8 @@ class IpResolver
 
             // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2)
             // We want the first (original client) IP
-            $ip = self::sanitize($_SERVER[$header]);
+            $value = self::unslash($_SERVER[$header]);
+            $ip = self::sanitize($value);
             $ip = explode(',', $ip)[0];
             $ip = trim($ip);
 
@@ -50,7 +51,7 @@ class IpResolver
         }
 
         // Fallback to REMOTE_ADDR or default
-        $fallback = isset($_SERVER['REMOTE_ADDR']) ? self::sanitize($_SERVER['REMOTE_ADDR']) : '0.0.0.0';
+        $fallback = isset($_SERVER['REMOTE_ADDR']) ? self::sanitize(self::unslash($_SERVER['REMOTE_ADDR'])) : '0.0.0.0';
 
         // In CLI/test environments, loopback IPs are common - return non-routable default
         if (in_array($fallback, ['127.0.0.1', '::1'], true)) {
@@ -76,6 +77,20 @@ class IpResolver
     }
 
     /**
+     * Unslash string (remove WordPress slashes)
+     *
+     * @param string $value Value to unslash
+     * @return string Unslashed value
+     */
+    private static function unslash(string $value): string
+    {
+        if (function_exists('wp_unslash')) {
+            return wp_unslash($value);
+        }
+        return stripslashes($value);
+    }
+
+    /**
      * Sanitize IP address input
      *
      * @param string $ip Raw IP address
@@ -92,7 +107,8 @@ class IpResolver
         }
 
         // Basic sanitization: remove control characters and strip tags
-        return htmlspecialchars(strip_tags($ip), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $strip_func = function_exists('wp_strip_all_tags') ? 'wp_strip_all_tags' : 'strip_tags';
+        return htmlspecialchars($strip_func($ip), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**

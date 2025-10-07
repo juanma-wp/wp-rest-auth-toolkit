@@ -28,7 +28,7 @@ class UserAgent
             return self::DEFAULT_USER_AGENT;
         }
 
-        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $user_agent = self::unslash($_SERVER['HTTP_USER_AGENT']);
 
         // Sanitize for security
         $user_agent = self::sanitize($user_agent);
@@ -39,6 +39,20 @@ class UserAgent
         }
 
         return $user_agent ?: self::DEFAULT_USER_AGENT;
+    }
+
+    /**
+     * Unslash string (remove WordPress slashes)
+     *
+     * @param string $value Value to unslash
+     * @return string Unslashed value
+     */
+    private static function unslash(string $value): string
+    {
+        if (function_exists('wp_unslash')) {
+            return wp_unslash($value);
+        }
+        return stripslashes($value);
     }
 
     /**
@@ -55,7 +69,8 @@ class UserAgent
         }
 
         // Basic sanitization: remove control characters and strip tags
-        return htmlspecialchars(strip_tags($user_agent), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $strip_func = function_exists('wp_strip_all_tags') ? 'wp_strip_all_tags' : 'strip_tags';
+        return htmlspecialchars($strip_func($user_agent), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**

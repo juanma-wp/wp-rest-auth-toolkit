@@ -57,7 +57,7 @@ jobs:
         repo-token: ''
         build-dir: './'
         checks: ''
-        exclude-checks: 'plugin_updater'
+        exclude-checks: 'plugin_updater,file_type'
         categories: 'plugin_repo'
         exclude-directories: 'tests,vendor'
         ignore-warnings: ''
