@@ -1,7 +1,7 @@
 /vendor/
 /composer.lock
 /.phpunit.cache/
-
+/wp-rest-auth-toolkit.php
 
 .DS_Store
 .idea/

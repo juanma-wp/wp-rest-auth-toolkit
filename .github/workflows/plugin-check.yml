@@ -1,0 +1,66 @@
+name: 'WordPress Plugin Check'
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  plugin-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        tools: composer:v2
+
+    - name: Install dependencies
+      run: composer install --no-dev --prefer-dist --no-progress --no-interaction
+
+    - name: Create test plugin wrapper
+      run: |
+        cat > wp-rest-auth-toolkit.php <<'EOF'
+        <?php
+        /**
+         * Plugin Name: WP REST Auth Toolkit
+         * Plugin URI: https://github.com/wp-rest-auth/auth-toolkit
+         * Description: Shared authentication utilities for WordPress REST API - JWT, OAuth2, and refresh token management
+         * Version: 1.0.0
+         * Requires at least: 5.6
+         * Requires PHP: 7.4
+         * Author: WordPress Developer
+         * License: GPL-2.0-or-later
+         * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+         * Text Domain: wp-rest-auth-toolkit
+         */
+
+        if (!defined('ABSPATH')) {
+            exit;
+        }
+
+        // Require Composer autoloader
+        if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+            require_once __DIR__ . '/vendor/autoload.php';
+        }
+        EOF
+
+    - name: Run WordPress Plugin Check
+      uses: wordpress/plugin-check-action@v1
+      with:
+        repo-token: ''
+        build-dir: './'
+        checks: ''
+        exclude-checks: 'plugin_updater'
+        categories: 'plugin_repo'
+        exclude-directories: 'tests,vendor'
+        ignore-warnings: ''
+        ignore-errors: ''
+        include-experimental: ''
+        wp-version: 'latest'
