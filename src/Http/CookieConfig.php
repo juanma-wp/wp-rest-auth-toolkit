@@ -177,7 +177,7 @@ class CookieConfig
         switch ($environment) {
             case self::ENV_DEVELOPMENT:
                 $defaults = [
-                    'secure'   => false, // Allow HTTP for localhost development (browsers allow SameSite=None with Secure=false on localhost)
+                    'secure'   => self::isSecure(), // Use actual HTTPS status, but allow HTTP on localhost
                     'samesite' => 'None',   // Allow cross-origin for SPAs
                     'path'     => '/',
                 ];
@@ -323,9 +323,22 @@ class CookieConfig
      */
     private static function validateConfig(array $config): array
     {
-        // SameSite=None requires Secure=true
+        // SameSite=None requires Secure=true, except on localhost in development
+        // Modern browsers allow SameSite=None with Secure=false on localhost
         if ('None' === $config['samesite']) {
-            $config['secure'] = true;
+            $is_development = self::isDevelopment();
+            $http_host = $_SERVER['HTTP_HOST'] ?? '';
+            $is_localhost_host = 'localhost' === $http_host ||
+                                 0 === strpos($http_host, 'localhost:') ||
+                                 '127.0.0.1' === $http_host ||
+                                 0 === strpos($http_host, '127.0.0.1:');
+
+            $is_localhost = $is_development && $is_localhost_host;
+
+            // Only force secure=true if not localhost in development
+            if (!$is_localhost) {
+                $config['secure'] = true;
+            }
         }
 
         // Validate SameSite value
