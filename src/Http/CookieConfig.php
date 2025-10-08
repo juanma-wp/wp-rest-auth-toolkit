@@ -177,7 +177,7 @@ class CookieConfig
         switch ($environment) {
             case self::ENV_DEVELOPMENT:
                 $defaults = [
-                    'secure'   => self::isSecure(), // Only if actually using HTTPS
+                    'secure'   => false, // Allow HTTP for localhost development (browsers allow SameSite=None with Secure=false on localhost)
                     'samesite' => 'None',   // Allow cross-origin for SPAs
                     'path'     => '/',
                 ];
