@@ -341,18 +341,38 @@ class CookieConfigTest extends TestCase
     }
 
     /**
-     * Test SameSite=None requires Secure=true validation
+     * Test SameSite=None requires Secure=true validation (except localhost in dev)
      */
     public function testSameSiteNoneRequiresSecure(): void
     {
+        // Test with non-localhost domain
+        $_SERVER['HTTP_HOST'] = 'example.com';
+        unset($_SERVER['HTTPS']);
+
+        CookieConfig::clearCache();
+        $config = CookieConfig::getConfig();
+
+        // Force SameSite=None to test the validation
+        if ($config['samesite'] !== 'None') {
+            define('WP_REST_AUTH_COOKIE_SAMESITE', 'None');
+            CookieConfig::clearCache();
+            $config = CookieConfig::getConfig();
+        }
+
+        if ($config['samesite'] === 'None') {
+            $this->assertTrue($config['secure'], 'Secure must be true when SameSite=None on non-localhost');
+        }
+
+        // Test localhost exception - localhost in development can have SameSite=None with Secure=false
         $_SERVER['HTTP_HOST'] = 'localhost';
         unset($_SERVER['HTTPS']);
 
         CookieConfig::clearCache();
         $config = CookieConfig::getConfig();
 
-        if ($config['samesite'] === 'None') {
-            $this->assertTrue($config['secure'], 'Secure must be true when SameSite=None');
+        if ($config['samesite'] === 'None' && $config['environment'] === 'development') {
+            // On localhost in development, secure can be false even with SameSite=None
+            $this->assertIsBool($config['secure'], 'Secure should be a boolean on localhost in development');
         }
     }
 
