@@ -29,6 +29,7 @@ class Hasher
         }
 
         if (!in_array($algorithm, hash_algos(), true)) {
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not output
             throw new \InvalidArgumentException(sprintf('Unsupported hash algorithm: %s', $algorithm));
         }
 
@@ -70,6 +71,7 @@ class Hasher
      */
     public static function make(string $token, string $secret, string $algorithm = 'sha256'): string
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 'self' is PHP keyword, not output
         $hasher = new self($secret, $algorithm);
         return $hasher->hash($token);
     }
