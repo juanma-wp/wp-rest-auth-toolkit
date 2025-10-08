@@ -147,7 +147,8 @@ class IpResolver
             return null;
         }
 
-        $ip = self::sanitize($_SERVER[$header]);
+        $value = self::unslash($_SERVER[$header]);
+        $ip = self::sanitize($value);
         $ip = explode(',', $ip)[0];
         return trim($ip);
     }

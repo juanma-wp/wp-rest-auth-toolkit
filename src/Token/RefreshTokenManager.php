@@ -211,23 +211,38 @@ class RefreshTokenManager
     {
         global $wpdb;
 
-        // Build query conditionally
-        $revoked_clause = $active_only ? 'AND is_revoked = 0' : '';
-
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $tokens = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT id, created_at, expires_at, ip_address, user_agent, is_revoked
-                 FROM {$wpdb->prefix}refresh_tokens
-                 WHERE user_id = %d AND token_type = %s $revoked_clause
-                 ORDER BY created_at DESC
-                 LIMIT %d",
-                $user_id,
-                $this->token_type,
-                $limit
-            ),
-            ARRAY_A
-        );
+        // Build query based on active_only parameter
+        if ($active_only) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $tokens = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT id, created_at, expires_at, ip_address, user_agent, is_revoked
+                     FROM {$wpdb->prefix}refresh_tokens
+                     WHERE user_id = %d AND token_type = %s AND is_revoked = 0
+                     ORDER BY created_at DESC
+                     LIMIT %d",
+                    $user_id,
+                    $this->token_type,
+                    $limit
+                ),
+                ARRAY_A
+            );
+        } else {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $tokens = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT id, created_at, expires_at, ip_address, user_agent, is_revoked
+                     FROM {$wpdb->prefix}refresh_tokens
+                     WHERE user_id = %d AND token_type = %s
+                     ORDER BY created_at DESC
+                     LIMIT %d",
+                    $user_id,
+                    $this->token_type,
+                    $limit
+                ),
+                ARRAY_A
+            );
+        }
 
         return $tokens ?: [];
     }

@@ -398,23 +398,15 @@ class CookieConfig
      */
     private static function maybeLogConfig(array $config): void
     {
+        // Logging is disabled for production - only enable in development if needed
+        // Use WordPress do_action() for custom logging instead
         if (!self::isDebugMode()) {
             return;
         }
 
-        // Use WordPress logging if available
-        if (function_exists('error_log')) {
-            error_log(
-                sprintf(
-                    '[Cookie Config] env=%s, auto_detect=%s, samesite=%s, secure=%s, httponly=%s, path=%s',
-                    $config['environment'],
-                    $config['auto_detect'] ? 'yes' : 'no',
-                    $config['samesite'],
-                    $config['secure'] ? 'yes' : 'no',
-                    $config['httponly'] ? 'yes' : 'no',
-                    $config['path']
-                )
-            );
+        // Trigger action for custom logging handlers
+        if (function_exists('do_action')) {
+            do_action('wp_rest_auth_cookie_config_log', $config);
         }
     }
 
