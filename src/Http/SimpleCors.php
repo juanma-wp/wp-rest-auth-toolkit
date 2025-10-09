@@ -138,10 +138,10 @@ class SimpleCors
 
         // Check request URI
         $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-        $rest_prefix = rest_get_url_prefix();
 
-        return strpos($request_uri, '/wp-json/') !== false
-            || strpos($request_uri, '/' . $rest_prefix . '/') !== false;
+        // Check for common REST API patterns
+        // We can't use rest_get_url_prefix() here as it might not be available yet
+        return strpos($request_uri, '/wp-json/') !== false;
     }
 
     /**
