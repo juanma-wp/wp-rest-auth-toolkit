@@ -120,7 +120,7 @@ class RefreshTokenManager
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $token_data = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$wpdb->prefix}refresh_tokens
+                "SELECT * FROM {$this->table_name}
                  WHERE token_hash = %s
                  AND expires_at > %d
                  AND is_revoked = 0
@@ -217,7 +217,7 @@ class RefreshTokenManager
             $tokens = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT id, created_at, expires_at, ip_address, user_agent, is_revoked
-                     FROM {$wpdb->prefix}refresh_tokens
+                     FROM {$this->table_name}
                      WHERE user_id = %d AND token_type = %s AND is_revoked = 0
                      ORDER BY created_at DESC
                      LIMIT %d",
@@ -232,7 +232,7 @@ class RefreshTokenManager
             $tokens = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT id, created_at, expires_at, ip_address, user_agent, is_revoked
-                     FROM {$wpdb->prefix}refresh_tokens
+                     FROM {$this->table_name}
                      WHERE user_id = %d AND token_type = %s
                      ORDER BY created_at DESC
                      LIMIT %d",
@@ -342,7 +342,7 @@ class RefreshTokenManager
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $deleted = $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM {$wpdb->prefix}refresh_tokens WHERE token_type = %s AND expires_at < %d",
+                "DELETE FROM {$this->table_name} WHERE token_type = %s AND expires_at < %d",
                 $this->token_type,
                 $expired_time
             )
