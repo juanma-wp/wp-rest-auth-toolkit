@@ -201,6 +201,35 @@ class Cors
     }
 
     /**
+     * Check if current request is an OPTIONS preflight request
+     *
+     * Helper method for REST API endpoints to detect and handle OPTIONS requests.
+     * Use this in REST callbacks to return early for preflight requests.
+     *
+     * @return bool True if this is an OPTIONS request
+     */
+    public static function isOptionsRequest(): bool
+    {
+        return self::isPreflightRequest();
+    }
+
+    /**
+     * Create a REST API response for OPTIONS preflight requests
+     *
+     * Returns a proper WP_REST_Response for OPTIONS requests.
+     * Headers are already set by handleRequest(), this just returns 200 OK.
+     *
+     * @return mixed WP_REST_Response if class exists, otherwise null
+     */
+    public static function handleOptionsRequest()
+    {
+        if (class_exists('WP_REST_Response')) {
+            return new \WP_REST_Response(null, 200);
+        }
+        return null;
+    }
+
+    /**
      * Check if origin is localhost (for development)
      *
      * @param string|null $origin Origin to check (null = auto-detect)

@@ -176,9 +176,20 @@ class CookieConfig
 
         switch ($environment) {
             case self::ENV_DEVELOPMENT:
+                $is_secure = self::isSecure();
+                $is_cross_origin = self::isCrossOrigin();
+
+                // For localhost development, default to None to support cross-origin requests
+                // Browsers allow SameSite=None without Secure on localhost
+                $http_host = $_SERVER['HTTP_HOST'] ?? '';
+                $is_localhost = in_array($http_host, ['localhost', '127.0.0.1', '::1'], true) ||
+                                0 === strpos($http_host, 'localhost:') ||
+                                0 === strpos($http_host, '127.0.0.1:');
+
                 $defaults = [
-                    'secure'   => self::isSecure(), // Use actual HTTPS status, but allow HTTP on localhost
-                    'samesite' => 'None',   // Allow cross-origin for SPAs
+                    'secure'   => $is_secure, // Use actual HTTPS status, but allow HTTP on localhost
+                    // SameSite=None for localhost or cross-origin HTTPS, otherwise Lax
+                    'samesite' => ($is_localhost || ($is_secure && $is_cross_origin)) ? 'None' : 'Lax',
                     'path'     => '/',
                 ];
                 break;
@@ -600,6 +611,49 @@ class CookieConfig
         }
 
         return false;
+    }
+
+    /**
+     * Check if request is cross-origin
+     *
+     * Compares the Origin header with the site URL using normalized URL parsing.
+     * Handles trailing slashes, protocol differences, ports, and case sensitivity.
+     *
+     * @return bool True if cross-origin
+     */
+    private static function isCrossOrigin(): bool
+    {
+        if (!isset($_SERVER['HTTP_ORIGIN'])) {
+            return false;
+        }
+
+        // Get site URL
+        $site_url = function_exists('get_site_url') ? get_site_url() : '';
+        if (empty($site_url)) {
+            return false;
+        }
+
+        // Parse both URLs
+        $origin_parts = function_exists('wp_parse_url') ? wp_parse_url($_SERVER['HTTP_ORIGIN']) : parse_url($_SERVER['HTTP_ORIGIN']);
+        $site_parts = function_exists('wp_parse_url') ? wp_parse_url($site_url) : parse_url($site_url);
+
+        // If parsing failed, fallback to trimmed string comparison
+        if (!$origin_parts || !$site_parts) {
+            return trim($_SERVER['HTTP_ORIGIN']) !== trim($site_url);
+        }
+
+        // Normalize and compare components
+        $origin_scheme = strtolower($origin_parts['scheme'] ?? 'http');
+        $site_scheme = strtolower($site_parts['scheme'] ?? 'http');
+        $origin_host = strtolower($origin_parts['host'] ?? '');
+        $site_host = strtolower($site_parts['host'] ?? '');
+        $origin_port = $origin_parts['port'] ?? null;
+        $site_port = $site_parts['port'] ?? null;
+
+        // Different scheme, host, or port = cross-origin
+        return $origin_scheme !== $site_scheme ||
+               $origin_host !== $site_host ||
+               $origin_port !== $site_port;
     }
 
     /**

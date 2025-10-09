@@ -168,14 +168,30 @@ class Cookie
     /**
      * Check if running in CLI environment
      *
+     * Determines if code is running in a true CLI context (terminal commands)
+     * vs a web request that happens to be processed by PHP-CLI (WordPress Studio, etc.)
+     *
      * @return bool True if CLI
      */
     private static function isCliEnvironment(): bool
     {
+        // PHPUnit test environment - skip cookies to avoid "headers already sent" errors
+        if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('WP_TESTS_CONFIG_FILE_PATH')) {
+            return true;
+        }
+
+        // If HTTP_HOST is set, this is a web request regardless of SAPI
+        // WordPress Studio and similar tools use PHP-CLI to serve web requests
+        if (isset($_SERVER['HTTP_HOST']) || isset($_SERVER['REQUEST_URI'])) {
+            return false;
+        }
+
+        // Check for WP-CLI command execution (without HTTP context)
         if (defined('WP_CLI') && WP_CLI) {
             return true;
         }
 
+        // Check SAPI (but only if no HTTP context)
         if (php_sapi_name() === 'cli') {
             return true;
         }
