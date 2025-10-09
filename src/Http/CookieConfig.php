@@ -179,7 +179,7 @@ class CookieConfig
                 $is_secure = self::isSecure();
                 $is_cross_origin = self::isCrossOrigin();
 
-                // For localhost development, default to None to support cross-origin requests
+                // For localhost development, default to None only for cross-origin requests
                 // Browsers allow SameSite=None without Secure on localhost
                 $http_host = $_SERVER['HTTP_HOST'] ?? '';
                 $is_localhost = in_array($http_host, ['localhost', '127.0.0.1', '::1'], true) ||
@@ -188,8 +188,8 @@ class CookieConfig
 
                 $defaults = [
                     'secure'   => $is_secure, // Use actual HTTPS status, but allow HTTP on localhost
-                    // SameSite=None for localhost or cross-origin HTTPS, otherwise Lax
-                    'samesite' => ($is_localhost || ($is_secure && $is_cross_origin)) ? 'None' : 'Lax',
+                    // SameSite=None only when cross-origin (with or without HTTPS on localhost)
+                    'samesite' => $is_cross_origin && ($is_localhost || $is_secure) ? 'None' : 'Lax',
                     'path'     => '/',
                 ];
                 break;
