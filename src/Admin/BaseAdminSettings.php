@@ -184,7 +184,7 @@ abstract class BaseAdminSettings
     public function corsAllowedOriginsField(): void
     {
         $settings = get_option($this->getGeneralSettingsOption(), []);
-        $value = $settings['cors_allowed_origins'] ?? "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175";
+        $value = $settings['cors_allowed_origins'] ?? '';
         ?>
         <textarea name="<?php echo esc_attr($this->getGeneralSettingsOption()); ?>[cors_allowed_origins]" class="large-text" rows="5"><?php echo esc_textarea($value); ?></textarea>
         <p class="description">One origin per line. Use * to allow all origins (not recommended for production).</p>
@@ -458,7 +458,7 @@ abstract class BaseAdminSettings
             $this->getGeneralSettingsOption(),
             [
                 'enable_debug_logging' => false,
-                'cors_allowed_origins' => "http://localhost:3000\nhttp://localhost:5173\nhttp://localhost:5174\nhttp://localhost:5175",
+                'cors_allowed_origins' => '',
             ]
         );
     }
