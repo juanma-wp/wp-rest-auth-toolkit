@@ -107,15 +107,10 @@ class RefreshTokenManager
         global $wpdb;
 
         $token_hash = $this->hasher->hash($refresh_token);
-        $cache_key = 'refresh_token_' . md5($token_hash);
 
-        // Try cache first
-        if (function_exists('wp_cache_get')) {
-            $token_data = wp_cache_get($cache_key, $this->cache_group);
-            if ($token_data !== false) {
-                return $token_data;
-            }
-        }
+        // SECURITY: Refresh token validation should NOT be cached
+        // Revocation must be reflected immediately to prevent reuse of compromised tokens
+        // Performance impact is minimal since refresh happens infrequently (~1/hour)
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $token_data = $wpdb->get_row(
@@ -132,10 +127,6 @@ class RefreshTokenManager
             ARRAY_A
         );
 
-        if ($token_data && function_exists('wp_cache_set')) {
-            wp_cache_set($cache_key, $token_data, $this->cache_group, $this->cache_ttl);
-        }
-
         return $token_data ?: false;
     }
 
@@ -150,12 +141,6 @@ class RefreshTokenManager
         global $wpdb;
 
         $token_hash = $this->hasher->hash($refresh_token);
-
-        // Clear cache
-        if (function_exists('wp_cache_delete')) {
-            $cache_key = 'refresh_token_' . md5($token_hash);
-            wp_cache_delete($cache_key, $this->cache_group);
-        }
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
