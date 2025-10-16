@@ -196,7 +196,7 @@ class CookieConfigTest extends TestCase
         $config = CookieConfig::getConfig();
 
         $this->assertSame('development', $config['environment']);
-        $this->assertSame('None', $config['samesite']);
+        $this->assertSame('Lax', $config['samesite']);
         $this->assertIsBool($config['secure']);
     }
 

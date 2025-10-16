@@ -45,6 +45,9 @@ class Cookie
             $options['samesite'] = apply_filters('wp_rest_auth_cookie_samesite', $options['samesite']);
         }
 
+        // TO-DO: Set PHP 8.1 as the minimal version for this plugin and remove this
+        // extra code (just return one setcookie)
+
         // Use PHP 7.3+ array syntax if available
         if (PHP_VERSION_ID >= 70300) {
             return setcookie($name, $value, [
@@ -78,6 +81,8 @@ class Cookie
      */
     public static function delete(string $name, string $path = '/'): bool
     {
+        // TO-DO: Check - how is this deleting the cookie?
+
         return self::set($name, '', [
             'expires' => time() - 3600,
             'path'    => $path,
@@ -115,6 +120,9 @@ class Cookie
             return $default;
         }
 
+
+        // TO-DO: Set PHP 8.1 as minimal version so unify this code
+
         // Use WordPress sanitization if available
         if (function_exists('sanitize_text_field')) {
             return sanitize_text_field($value);
@@ -148,6 +156,8 @@ class Cookie
             return is_ssl();
         }
 
+        // TO-DO: Double check these verifications
+
         // Standard HTTPS detection
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
             return true;
@@ -175,6 +185,8 @@ class Cookie
      */
     private static function isCliEnvironment(): bool
     {
+        // TO-DO: Double check this
+
         // PHPUnit test environment - skip cookies to avoid "headers already sent" errors
         if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('WP_TESTS_CONFIG_FILE_PATH')) {
             return true;
@@ -214,6 +226,9 @@ class Cookie
         int $ttl = 2592000,
         string $path = '/'
     ): bool {
+        // TO-DO: Check if src/Token/RefreshTokenManager.php should handle
+        // the creation of the refresh token
+
         return self::set($name, $value, [
             'expires'  => time() + $ttl,
             'path'     => $path,
