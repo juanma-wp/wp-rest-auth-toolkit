@@ -85,8 +85,7 @@ use WPRestAuth\AuthToolkit\Token\RefreshTokenManager;
 $manager = new RefreshTokenManager(
     table_name: $wpdb->prefix . 'jwt_refresh_tokens',
     secret: 'your-secret',
-    token_type: 'jwt',
-    cache_group: 'auth_tokens'
+    token_type: 'jwt'
 );
 
 // Store refresh token

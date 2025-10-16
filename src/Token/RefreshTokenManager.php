@@ -33,28 +33,20 @@ class RefreshTokenManager
     private string $table_name;
     private Hasher $hasher;
     private string $token_type;
-    private string $cache_group;
-    private int $cache_ttl;
 
     /**
      * @param string $table_name Database table name (with prefix)
      * @param string $secret Secret key for token hashing
      * @param string $token_type Token type identifier ('jwt' or 'oauth2')
-     * @param string $cache_group WordPress cache group name
-     * @param int $cache_ttl Cache TTL in seconds (default: 300)
      */
     public function __construct(
         string $table_name,
         string $secret,
-        string $token_type,
-        string $cache_group,
-        int $cache_ttl = 300
+        string $token_type
     ) {
         $this->table_name = $table_name;
         $this->hasher = new Hasher($secret);
         $this->token_type = $token_type;
-        $this->cache_group = $cache_group;
-        $this->cache_ttl = $cache_ttl;
     }
 
     /**
