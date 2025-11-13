@@ -4,7 +4,7 @@ Tags: authentication, jwt, oauth2, rest-api, security
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,14 @@ This library provides building blocks for authentication. It's designed to be in
 Yes, fully compatible with WordPress 5.6 and above, including the latest WordPress 6.x versions.
 
 == Changelog ==
+
+= 1.0.1 =
+* Refactored RefreshTokenManager to remove cache group parameter
+* Implemented read-only cookie settings in BaseAdminSettings
+* Enhanced cookie configuration display
+* Removed caching for refresh token validation
+* Updated CORS allowed origins default value
+* Refined SameSite cookie handling for localhost and cross-origin requests
 
 = 1.0.0 =
 * Initial release

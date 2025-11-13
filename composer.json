@@ -1,6 +1,7 @@
 {
   "name": "wp-rest-auth/auth-toolkit",
   "description": "Shared authentication utilities for WordPress REST API - JWT, OAuth2, and refresh token management",
+  "version": "1.0.1",
   "type": "library",
   "keywords": [
     "wordpress",
