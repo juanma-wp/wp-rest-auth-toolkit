@@ -146,6 +146,24 @@ class CookieTest extends TestCase
     }
 
     /**
+     * Test Cookie::get() handles real refresh token scenario from curl.
+     *
+     * Tests the exact scenario where a refresh token is sent via curl's -H 'Cookie:' header.
+     * This simulates: curl -H 'Cookie: wp_jwt_refresh_token=6638c55cc0136396b3c05fa0afbdd48d0f2a393c589728278ca068a308177183'
+     *
+     * @group regression
+     */
+    public function testGetHandlesRealRefreshTokenFromCurl(): void
+    {
+        $refreshToken = '6638c55cc0136396b3c05fa0afbdd48d0f2a393c589728278ca068a308177183';
+        $_SERVER['HTTP_COOKIE'] = 'wp_jwt_refresh_token=' . $refreshToken;
+
+        $value = Cookie::get('wp_jwt_refresh_token');
+
+        $this->assertSame($refreshToken, $value, 'Should correctly parse refresh token from curl Cookie header');
+    }
+
+    /**
      * Test Cookie::get() handles WordPress context (sanitize_text_field).
      *
      * This test simulates WordPress being available.
